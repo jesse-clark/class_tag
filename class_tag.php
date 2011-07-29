@@ -1,9 +1,10 @@
 <?php
-/*
+/**
+	\file class_tag.php
 	The following class is used to keep track of tags.
 */
 
-//namespace Tags_by_Jesse;
+//!namespace Tags_by_Jesse;
 
 class tag {
 
@@ -11,7 +12,7 @@ class tag {
 	private $attributes;    //array : key=>value = "key = value" or "key" (when no value)
 	private $void_element;  //boolean	
 	private $parent;        //pointer
-    private $children;		//array of class tag
+    protected $children;		//array of class tag
 
 	private static $class;
 
@@ -176,7 +177,77 @@ class tag {
 		return $tag[0] . $display . $tag[1];
 	}
 
-	private function display_pretty($option = 'pretty') {
+
+
+    private function display_pretty($option = 'pretty') {
+        static $tab_amount;
+        $tab = '  ';
+		if(!isset($tab_amount)) {
+			$tab_amount = '';
+		} elseif(!empty($this->name)) {
+			$tab_amount .= $tab;
+		} 
+        $display = '';
+        $tag = $this->prepare_tag();
+        $count = 0;
+        $recieved_endline = false;
+		if(!empty($this->children)) {
+            foreach($this->children as $child_tag) {
+				if(is_string($child_tag)) {
+					$display .= $child_tag;
+                } else {
+                    $to_display =  $child_tag->display($option);
+                    if(empty($to_display)) {
+                        continue;
+                    }
+                    if(!empty($tag[0]) || $count > 0 && $to_display != "\n") {
+                        $to_display = "\n" . $tab_amount . $to_display;
+                        $recieved_endline = true;
+
+                    }
+                    if(!empty($tag[1])) {
+                        //$to_display .= "\n";
+                    }
+                    $display .= $to_display ;
+                    $count++;
+				}
+			}
+        }
+        $tab_amount = substr($tab_amount, 0, -(strlen($tab)));
+        if($count > 0 && !empty($tag[0]) && !$recieved_endline) {
+            $tag[0] = "\n" . $tab_amount . $tag[0];
+        }
+        if(!empty($display)) {
+            //$display .= "\n";
+        }
+        if($count > 0) {
+            $tag[1] = "\n" . $tab_amount . $tag[1];
+        }
+		return $tag[0] . $display  . $tag[1]; 
+    }
+
+    private function display_pretty3($option = 'pretty') {
+        $display = '';
+        $tag = $this->prepare_tag();
+        $count = 0;
+        foreach($this->children as $child_tag) {
+            
+            if(is_string($child_tag)) {
+                $display .= $child_tag;
+            } else {
+                $display .=  $child_tag->display($option);
+            }
+            $count++;
+        }
+        if(!empty($tag[0])) {
+            if(!empty($tag[1])) {
+            }
+        }    
+        return $tag[0]  . $display  . $tag[1];
+    }
+
+
+    private function display_pretty4($option = 'pretty') {
         static $tab_amount;
         $tab = '  ';
 		if(!isset($tab_amount)) {
@@ -189,24 +260,38 @@ class tag {
 		$display = '';
 		$tag = $this->prepare_tag(/*$tab_amount*/);
 
-		static $should_i_endline = false;
+        static $should_i_endline = false;
+        //$osie = $should_i_endline;
 		$counter = 0;
 		if(!empty($this->children)) {
 			$child_count = count($this->children);
-			foreach($this->children as $child_tag) {
-				$child_tag_is_string = is_string($child_tag);
-				if(!$child_tag_is_string) {
-					$child_tag_data = $child_tag->display($option);
-				}
-				if(!empty($this->name) && $should_i_endline || $child_count > 1) {
-					$display .= "\n" . $tab_amount;
-				}
-				if($child_tag_is_string) {
-					$display .= $child_tag;
-				} else {
-					$display .= $child_tag_data;
-				}
-				$counter++;
+            foreach($this->children as $child_tag) {
+                $child_tag_is_string = is_string($child_tag);
+                if($child_tag_is_string) {
+                    $display .= $child_tag;
+                } else {
+                    $child_tag_data = $child_tag->display($option);
+                    if((!empty($this->name) || $counter >0) && ($should_i_endline || $child_count > 1)) {
+                        //$should_i_endline = false;
+                        $display .= "\n" . $tab_amount;
+                        $counter++;
+                    }
+                    $display .= $child_tag_data;
+
+                }
+ //   			$child_tag_is_string = is_string($child_tag);
+ //   			if(!$child_tag_is_string) {
+ //   				$child_tag_data = $child_tag->display($option);
+ //   			}
+ //   			if(!empty($this->name) && $should_i_endline || $child_count > 1) {
+ //   				$display .= "\n" . $tab_amount;
+ //   			}
+ //   			if($child_tag_is_string) {
+ //   				$display .= $child_tag;
+ //   			} else {
+ //   				$display .= $child_tag_data;
+ //   			}
+ //   			$counter++;
 			
 
 //				if(is_string($child_tag)) {
@@ -229,13 +314,20 @@ class tag {
 	//				//$should_i_endline = true;
 	 //   		}
 			}
-		}
-		if($counter > 1)
+        }
+        $tab_amount = substr($tab_amount, 0, -(strlen($tab))); 
+        if($counter > 1) {
+            //$display .= "\n" . $tab_amount;
 			$should_i_endline = true;
-		$tab_amount = substr($tab_amount, 0, -(strlen($tab)));
-		if($should_i_endline)
-			$display .= "\n" . $tab_amount;
-		return $tag[0] . $display . $tag[1];
+        }
+        //if($counter > 1)
+          //  $display .= "\n" . $tab_amount;
+        if($should_i_endline /*&& !empty($this->name)*/) {
+            $display .= "\n" . $tab_amount;
+            //$should_i_endline = false;
+        }
+        //$should_i_endline = $osie;
+		return $tag[0] . $display . $tag[1] . '<!-- ' . $counter . ' ' . (string) $should_i_endline . ' -->';
 
 
 	}

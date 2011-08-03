@@ -4,7 +4,7 @@ Developed by Jesse Clark
 
 See examples/html5_test.php for an example of how to use class_tag.php
 
-Uses Doxygen to manage 
+Uses Doxygen to manage comments.
 
 Issues:
     - single whitespace appearing at the end of some lines in pretty print mode

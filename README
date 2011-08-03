@@ -1,0 +1,10 @@
+class_tag.php - a method for handling markup languages
+
+Developed by Jesse Clark
+
+See examples/html5_test.php for an example of how to use class_tag.php
+
+Uses Doxygen to manage 
+
+Issues:
+    - single whitespace appearing at the end of some lines in pretty print mode
